@@ -13,15 +13,6 @@ import java.util.List;
 import static com.demo_collab.connect.Connect.getConnection;
 
 public class UserService implements IUser {
-//    private final Connection connection;
-//
-//    {
-//        try {
-//            connection = Connect.getConnection();
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
 
     private static final String SELECT_ALL_USERS = "select * from user";
     private static final String INSERT = "insert into user (user_id, user_name, phone, province_id, role_id) values (?,?,?,?,?)";
@@ -30,67 +21,71 @@ public class UserService implements IUser {
     @Override
     public List<User> findAll() {
         List<User> users = new ArrayList<>();
-        if (connection != null) {
-            try (
-                    PreparedStatement statement = connection.prepareStatement(SELECT_ALL_USERS)
-            ) {
-                System.out.println(statement);
-                ResultSet rs = statement.executeQuery();
-
-                while (rs.next()) {
-                    int id = rs.getInt("user_id");
-                    String name = rs.getString("user_name");
-                    String phone = rs.getString("phone");
-                    int province_id = rs.getInt("province_id");
-                    int role_id = rs.getInt("role_id");
-                    users.add(new User(id, name, phone, province_id, role_id));
-                }
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-            return users;
-        }
-    }
-
-    @Override
-    public void save(User user) {
-//        if (connection != null) {
-//            try (
-//                    PreparedStatement statement = connection.prepareStatement(INSERT)
-//            ) {
-//                connection.setAutoCommit(false);
-//                statement.setInt(1, user.getUser_id());
-//                statement.setString(2, user.getUser_name());
-//                statement.setString(3, user.getPhone());
-//                statement.setInt(4, user.getProvince_id());
-//                statement.setInt(5, user.getRole_id());
-//                connection.commit();
-//                connection.setAutoCommit(true);
-//                statement.executeQuery();
-//            } catch (SQLException e) {
-//                try {
-//                    connection.rollback();
-//                } catch (SQLException ex) {
-//                    throw new RuntimeException(ex);
-//                }
-//            } finally {
-//                try {
-//                    connection.close();
-//                } catch (SQLException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }
-//        }
         Connection connection = null;
         PreparedStatement statement = null;
         ResultSet rs = null;
         try {
             connection = getConnection();
             connection.setAutoCommit(false);
-            statement = connection.prepareStatement(INSERT);
-
+            statement = connection.prepareStatement(SELECT_ALL_USERS);
+            rs = statement.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt("user_id");
+                String name = rs.getString("user_name");
+                String phone = rs.getString("phone");
+                int province_id = rs.getInt("province_id");
+                int role_id = rs.getInt("role_id");
+                users.add(new User(id, name, phone, province_id, role_id));
+            }
+            connection.commit();
+            connection.setAutoCommit(true);
         } catch (SQLException e) {
-            e.printStackTrace();
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (statement != null) statement.close();
+                if (connection != null) connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return users;
+    }
+
+    @Override
+    public void save(User user) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        try {
+            connection = getConnection();
+            connection.setAutoCommit(false);
+            statement = connection.prepareStatement(INSERT);
+            statement.setInt(1, user.getUser_id());
+            statement.setString(2, user.getUser_name());
+            statement.setString(3, user.getPhone());
+            statement.setInt(4, user.getProvince_id());
+            statement.setInt(5, user.getRole_id());
+            statement.executeUpdate();
+            connection.commit();
+            connection.setAutoCommit(true);
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        } finally {
+            try {
+                if (statement != null) statement.close();
+                if (connection != null) connection.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
         }
     }
 
