@@ -1,4 +1,7 @@
 package com.demo_collab.service.User;
 
-public interface IUser {
+import com.demo_collab.model.User;
+import com.demo_collab.service.IGeneric;
+
+public interface IUser extends IGeneric<User> {
 }
