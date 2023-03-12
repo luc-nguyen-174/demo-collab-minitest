@@ -41,5 +41,5 @@ bin/
 ### Mac OS ###
 .DS_Store
 
-/src/main/java/com/demo_collab/connect/Connect.java
 /.idea/
+/src/main/java/com/demo_collab/connect/Connect.java
