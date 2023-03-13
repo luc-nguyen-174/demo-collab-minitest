@@ -9,7 +9,7 @@ public class Connect {
     private static final String jdbcUsername = "root";
     private static final String jdbcPassword = "Nguyenluc97";
 
-    public static Connection getConnection() {
+    public Connection getConnection() {
         Connection connection = null;
         try {
             Class.forName("com.mysql.jdbc.Driver");
